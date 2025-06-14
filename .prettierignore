@@ -1,0 +1,9 @@
+# Dependências
+node_modules
+
+# Código compilado / build
+dist
+build
+
+# Relatórios
+coverage

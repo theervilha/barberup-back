@@ -11,10 +11,10 @@ export default tseslint.config(
   // É comum adicionar uma barra no final para garantir que pastas inteiras sejam ignoradas.
   {
     ignores: [
-      "node_modules/", 
+      "node_modules/",
       "dist/",
       // É uma boa prática ignorar o próprio arquivo de configuração do ESLint.
-      "eslint.config.mjs" 
+      "eslint.config.mjs",
     ],
   },
 
@@ -34,16 +34,15 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.browser, // Adiciona globais de ambiente de navegador (ex: document, window)
-        ...globals.node,    // Adiciona globais de ambiente Node.js (ex: process, require)
+        ...globals.node, // Adiciona globais de ambiente Node.js (ex: process, require)
       },
     },
     // Você pode adicionar ou sobrescrever regras aqui
     rules: {
       // Exemplo: exigir ponto e vírgula no final das linhas
       // 'semi': ['error', 'always'],
-      
       // Exemplo: avisar sobre o uso de 'any' em TypeScript
       // '@typescript-eslint/no-explicit-any': 'warn',
     },
-  }
+  },
 );
