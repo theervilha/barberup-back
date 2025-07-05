@@ -37,3 +37,5 @@ coverage/
 
 # Misc
 *.pem          # certificados SSL privados (se houver)
+
+src/generated/prisma
