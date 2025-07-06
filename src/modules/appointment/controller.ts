@@ -9,7 +9,7 @@ export async function getAppointmentById(req: Request, res: Response) {
   const id = Number(req.params.id);
 
   try {
-    const appointment = await service.getAppointmentById(id);
+    const appointment = await service.getById(id);
     console.log(appointment);
     res.json(appointment);
   } catch (error) {
