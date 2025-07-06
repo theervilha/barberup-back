@@ -7,7 +7,10 @@ export class AppointmentRepository {
   }
 
   async getById(id: number) {
-    return await prisma.appointment.findUnique({ where: { id } });
+    return await prisma.appointment.findUnique({
+      where: { id },
+      include: { services: true },
+    });
   }
 
   async update(id: number, data: Prisma.AppointmentUpdateInput) {

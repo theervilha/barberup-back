@@ -1,10 +1,10 @@
 import { AppointmentRepository } from "./repository";
 
-const repository = new AppointmentRepository();
-
 export class AppointmentService {
+  constructor(private repository: AppointmentRepository) {}
+
   async getAppointmentById(id: number) {
-    const appointment = await repository.getById(id);
+    const appointment = await this.repository.getById(id);
     if (!appointment) {
       throw new Error("Appointment not found");
     }
