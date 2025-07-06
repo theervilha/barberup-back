@@ -20,8 +20,4 @@ export class AppointmentRepository {
   async delete(id: number): Promise<Appointment> {
     return await prisma.appointment.delete({ where: { id } });
   }
-
-  async findByShopId(shopId: string) {
-    return await prisma.appointment.findMany({ where: { shopId } });
-  }
 }

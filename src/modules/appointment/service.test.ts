@@ -1,6 +1,7 @@
 import { jest, describe, expect, beforeEach, it } from "@jest/globals";
 import { AppointmentRepository } from "./repository";
 import { AppointmentService } from "./service";
+import { CreateAppointmentInput } from "./validators/appointment.schema";
 
 describe("Appointment Service", () => {
   let appointmentService: AppointmentService;
@@ -21,7 +22,7 @@ describe("Appointment Service", () => {
         name: "Corte de Cabelo",
         description: "Corte padrão masculino",
         images: [],
-        consumeHours: 30,
+        consumeMinutes: 30,
         price: 3000,
         shopId: "shop-123",
         createdAt: new Date(),
@@ -36,7 +37,6 @@ describe("Appointment Service", () => {
       getById: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-      findByShopId: jest.fn(),
     } as jest.Mocked<AppointmentRepository>;
 
     appointmentService = new AppointmentService(mockRepository);
@@ -45,19 +45,34 @@ describe("Appointment Service", () => {
   describe("create", () => {
     it("should create appointment", async () => {
       mockRepository.create.mockResolvedValue(baseMockAppointment);
-      const createData = {
+      const createInput: CreateAppointmentInput = {
         shopId: "shop-123",
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: "2023-10-27T10:00:00.000Z",
+        endDate: "2023-10-27T10:00:00.000Z",
         customerName: "Teste",
         customerPhone: "5584911111111",
-        servicesIds: [1],
+        serviceIds: [1],
       };
 
-      const result = await appointmentService.create(createData);
+      const result = await appointmentService.create(createInput);
+
+      const { shopId, serviceIds, ...restOfCreateInput } = createInput;
+      const expectedPrismaData = {
+        ...restOfCreateInput,
+        startDate: new Date(createInput.startDate),
+        endDate: new Date(createInput.endDate),
+        shop: {
+          connect: {
+            id: createInput.shopId,
+          },
+        },
+        services: {
+          connect: [{ id: 1 }],
+        },
+      };
 
       expect(result).toEqual(baseMockAppointment);
-      expect(mockRepository.create).toHaveBeenCalledWith(createData);
+      expect(mockRepository.create).toHaveBeenCalledWith(expectedPrismaData);
     });
 
     it.todo("should throw a ShopNotFound error when the shop does not exist");
@@ -69,7 +84,7 @@ describe("Appointment Service", () => {
         endDate: new Date(),
         customerName: "Teste",
         customerPhone: "5584911111111",
-        servicesIds: [1],
+        serviceIds: [1],
       };
 
       const expectedError = new ShopNotFoundError(createData.shopId);
@@ -114,26 +129,52 @@ describe("Appointment Service", () => {
   });
 
   describe("update", () => {
+    const updateInput = {
+      startDate: "2023-10-27T10:00:00.000Z",
+      endDate: "2023-10-27T10:00:00.000Z",
+      customerName: "Joao",
+      customerPhone: "5511922222222",
+      serviceIds: [1] as [number, ...number[]],
+      shopId: "shop-123",
+    };
+
     it("should update appointment", async () => {
       const updatedMockAppointment = {
         ...baseMockAppointment,
         customerName: "Joao",
         customerPhone: "5511922222222",
       };
+      mockRepository.getById.mockResolvedValue(baseMockAppointment);
       mockRepository.update.mockResolvedValue(updatedMockAppointment);
 
-      const updateData = {
-        startDate: new Date(),
-        endDate: new Date(),
-        customerName: "Joao",
-        customerPhone: "5511922222222",
-        servicesIds: [1],
+      const { shopId, serviceIds, ...restOfUpdateInput } = updateInput;
+      const expectedPrismaData = {
+        ...restOfUpdateInput,
+        startDate: new Date(updateInput.startDate),
+        endDate: new Date(updateInput.endDate),
+        shop: {
+          connect: {
+            id: updateInput.shopId,
+          },
+        },
+        services: {
+          set: [{ id: 1 }],
+        },
       };
 
-      const result = await appointmentService.update(1, updateData);
+      const result = await appointmentService.update(1, updateInput);
 
       expect(result).toEqual(updatedMockAppointment);
-      expect(mockRepository.update).toHaveBeenCalledWith(1, updateData);
+      expect(mockRepository.update).toHaveBeenCalledWith(1, expectedPrismaData);
+    });
+
+    it("should throw error when appointment not found", async () => {
+      mockRepository.getById.mockResolvedValue(null);
+
+      const result = appointmentService.update(1, updateInput);
+      await expect(result).rejects.toThrowError("Appointment not found");
+      expect(mockRepository.getById).toHaveBeenCalledWith(1);
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it.todo("should throw an error if the updated time slot is already booked");
@@ -148,12 +189,23 @@ describe("Appointment Service", () => {
   describe("delete", () => {
     it("should delete appointment", async () => {
       const { services, ...deletedMockAppointment } = baseMockAppointment;
+      mockRepository.getById.mockResolvedValue(baseMockAppointment);
       mockRepository.delete.mockResolvedValue(deletedMockAppointment);
 
       const result = await appointmentService.delete(1);
 
       expect(result).toEqual(deletedMockAppointment);
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.getById).toHaveBeenCalledWith(1);
+    });
+
+    it("should throw error when appointment not found", async () => {
+      mockRepository.getById.mockResolvedValue(null);
+
+      const result = appointmentService.delete(1);
+      await expect(result).rejects.toThrowError("Appointment not found");
+      expect(mockRepository.getById).toHaveBeenCalledWith(1);
+      expect(mockRepository.delete).not.toHaveBeenCalled();
     });
 
     it.todo("should throw an error if the updated time slot is already booked");
@@ -163,18 +215,5 @@ describe("Appointment Service", () => {
     it.todo("should throw an error if startDate is in the past");
     it.todo("should throw an error if startDate is after endDate");
     it.todo("should throw an error if customerPhone is not valid");
-  });
-
-  describe("list shop appointments", () => {
-    const listMockAppointments = [{ ...baseMockAppointment }];
-
-    it("should return appointments by shopId", async () => {
-      mockRepository.findByShopId.mockResolvedValue(listMockAppointments);
-
-      const result = await appointmentService.getByShopId("shop-123");
-
-      expect(result).toEqual(listMockAppointments);
-      expect(mockRepository.findByShopId).toHaveBeenCalledWith("shop-123");
-    });
   });
 });

@@ -33,7 +33,7 @@ model Service {
   name String
   description String
   images String[] @default([])
-  consumeHours Int
+  consumeMinutes Int
   price Int
 
   appointments Appointment[]
