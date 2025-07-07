@@ -207,13 +207,5 @@ describe("Appointment Service", () => {
       expect(mockRepository.getById).toHaveBeenCalledWith(1);
       expect(mockRepository.delete).not.toHaveBeenCalled();
     });
-
-    it.todo("should throw an error if the updated time slot is already booked");
-    it.todo(
-      "should throw an error when the updated time slot is outside business hours",
-    );
-    it.todo("should throw an error if startDate is in the past");
-    it.todo("should throw an error if startDate is after endDate");
-    it.todo("should throw an error if customerPhone is not valid");
   });
 });
