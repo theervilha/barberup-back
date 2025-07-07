@@ -9,7 +9,7 @@ export const AppointmentSchema = z.object({
   customerPhone: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  services: z.array(z.any()),
+  services: z.array(z.any()).optional(),
 });
 
 export const AppointmentInputSchema = z.object({
