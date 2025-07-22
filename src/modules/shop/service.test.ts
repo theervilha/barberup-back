@@ -15,7 +15,19 @@ describe("Shop Service", () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  const baseMockShopWithServices = { ...baseMockShop, services: [] };
+  const baseMockShopComplete = {
+    ...baseMockShop,
+    services: [],
+    workingHours: [
+      {
+        id: "1",
+        shopId: "shop-123",
+        weekDay: 1,
+        openAt: new Date(),
+        closeAt: new Date(),
+      },
+    ],
+  };
 
   beforeEach(() => {
     mockRepository = {
@@ -36,12 +48,32 @@ describe("Shop Service", () => {
         name: "Barbearia linda",
         address: "Onde Judas perdeu as botas",
         phone: "5584911111111",
+        workingHours: [
+          {
+            weekDay: 1,
+            openAt: "10:00",
+            closeAt: "19:00",
+          },
+        ],
+      };
+
+      const createInputPrismaData = {
+        ...createInput,
+        workingHours: {
+          create: [
+            {
+              weekDay: 1,
+              openAt: new Date("1970-01-01T10:00:00.000Z"),
+              closeAt: new Date("1970-01-01T19:00:00.000Z"),
+            },
+          ],
+        },
       };
 
       const result = await shopService.create(createInput);
 
       expect(result).toEqual(baseMockShop);
-      expect(mockRepository.create).toHaveBeenCalledWith(createInput);
+      expect(mockRepository.create).toHaveBeenCalledWith(createInputPrismaData);
     });
 
     it.todo("should throw error if shop already exists");
@@ -50,11 +82,11 @@ describe("Shop Service", () => {
 
   describe("find shop by id", () => {
     it("should return shop when found", async () => {
-      mockRepository.findById.mockResolvedValue(baseMockShopWithServices);
+      mockRepository.findById.mockResolvedValue(baseMockShopComplete);
 
       const result = await shopService.findById("shop-123");
 
-      expect(result).toEqual(baseMockShopWithServices);
+      expect(result).toEqual(baseMockShopComplete);
       expect(mockRepository.findById).toHaveBeenCalledWith("shop-123");
     });
 
@@ -92,6 +124,13 @@ describe("Shop Service", () => {
       name: "Barbearia Ajustada",
       address: "Onde Judas não perdeu as botas",
       phone: "5584922222222",
+      workingHours: [
+        {
+          weekDay: 2,
+          openAt: "10:00",
+          closeAt: "18:00",
+        },
+      ],
     };
 
     it("should update Shop", async () => {
@@ -100,15 +139,28 @@ describe("Shop Service", () => {
         ...updateInput,
       };
 
-      mockRepository.findById.mockResolvedValue(baseMockShopWithServices);
+      mockRepository.findById.mockResolvedValue(baseMockShopComplete);
       mockRepository.update.mockResolvedValue(updatedMockShop);
 
       const result = await shopService.update("shop-123", updateInput);
-
       expect(result).toEqual(updatedMockShop);
+
+      const updateInputPrismaData = {
+        ...updateInput,
+        workingHours: {
+          deleteMany: {},
+          create: [
+            {
+              weekDay: 2,
+              openAt: new Date("1970-01-01T10:00:00.000Z"),
+              closeAt: new Date("1970-01-01T18:00:00.000Z"),
+            },
+          ],
+        },
+      };
       expect(mockRepository.update).toHaveBeenCalledWith(
         "shop-123",
-        updateInput,
+        updateInputPrismaData,
       );
     });
 
@@ -126,7 +178,7 @@ describe("Shop Service", () => {
 
   describe("delete", () => {
     it("should delete Shop", async () => {
-      mockRepository.findById.mockResolvedValue(baseMockShopWithServices);
+      mockRepository.findById.mockResolvedValue(baseMockShopComplete);
       mockRepository.delete.mockResolvedValue(baseMockShop);
 
       const result = await shopService.delete("shop-123");

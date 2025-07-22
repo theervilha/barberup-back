@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { ShopRepository } from "./repository";
 import { CreateShopInput, UpdateShopInput } from "./validators/shop.schema";
 
@@ -17,12 +18,37 @@ export class ShopService {
   }
 
   async create(data: CreateShopInput) {
-    return await this.repository.create(data);
+    return await this.repository.create({
+      ...data,
+      workingHours: {
+        create: data.workingHours.map((hour) => ({
+          weekDay: hour.weekDay,
+          openAt: new Date(`1970-01-01T${hour.openAt}:00Z`),
+          closeAt: new Date(`1970-01-01T${hour.closeAt}:00Z`),
+        })),
+      },
+    });
   }
 
   async update(id: string, data: UpdateShopInput) {
     await this.findById(id);
-    return await this.repository.update(id, data);
+
+    const { workingHours, ...restOfData } = data;
+    const updatePrismaData: Prisma.ShopUpdateInput = {
+      ...restOfData,
+      ...(workingHours && {
+        workingHours: {
+          deleteMany: {},
+          create: workingHours.map((hour) => ({
+            weekDay: hour.weekDay,
+            openAt: new Date(`1970-01-01T${hour.openAt}:00Z`),
+            closeAt: new Date(`1970-01-01T${hour.closeAt}:00Z`),
+          })),
+        },
+      }),
+    };
+
+    return await this.repository.update(id, updatePrismaData);
   }
 
   async delete(id: string) {

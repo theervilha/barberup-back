@@ -9,7 +9,10 @@ export class ShopRepository {
   async findById(id: string) {
     return await prisma.shop.findUnique({
       where: { id },
-      include: { services: true },
+      include: {
+        services: true,
+        workingHours: true,
+      },
     });
   }
 
