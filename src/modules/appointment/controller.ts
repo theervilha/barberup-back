@@ -1,13 +1,9 @@
 import { Request, Response } from "express";
-import { AppointmentService } from "./service";
-import { AppointmentRepository } from "./repository";
 import {
   AppointmentInputSchema,
   UpdateAppointmentSchema,
 } from "./validators/appointment.schema";
-
-const appointmentRepository = new AppointmentRepository();
-const appointmentService = new AppointmentService(appointmentRepository);
+import { appointmentService } from "../../di/container";
 
 export async function getAppointmentById(req: Request, res: Response) {
   const id = Number(req.params.id);

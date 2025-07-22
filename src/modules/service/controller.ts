@@ -1,13 +1,9 @@
 import { Request, Response } from "express";
-import { ServicesService } from "./service";
-import { ServiceRepository } from "./repository";
+import { servicesService } from "../../di/container";
 import {
   ServiceInputSchema,
   UpdateServiceSchema,
 } from "./validators/service.schema";
-
-const serviceRepository = new ServiceRepository();
-const servicesService = new ServicesService(serviceRepository);
 
 export async function findServiceById(req: Request, res: Response) {
   const id = Number(req.params.id);

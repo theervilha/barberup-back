@@ -2,10 +2,12 @@ import { jest, describe, expect, beforeEach, it } from "@jest/globals";
 import { ShopRepository } from "./repository";
 import { ShopService } from "./service";
 import { CreateShopInput } from "./validators/shop.schema";
+import { AppointmentRepository } from "../appointment/repository";
 
 describe("Shop Service", () => {
   let shopService: ShopService;
   let mockRepository: jest.Mocked<ShopRepository>;
+  let appointmentRepository: jest.Mocked<AppointmentRepository>;
 
   const baseMockShop = {
     id: "shop-123",
@@ -38,7 +40,15 @@ describe("Shop Service", () => {
       findAll: jest.fn(),
     } as jest.Mocked<ShopRepository>;
 
-    shopService = new ShopService(mockRepository);
+    appointmentRepository = {
+      create: jest.fn(),
+      getById: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      findFutureByShopId: jest.fn(),
+    } as jest.Mocked<AppointmentRepository>;
+
+    shopService = new ShopService(mockRepository, appointmentRepository);
   });
 
   describe("create", () => {

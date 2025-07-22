@@ -20,4 +20,20 @@ export class AppointmentRepository {
   async delete(id: number): Promise<Appointment> {
     return await prisma.appointment.delete({ where: { id } });
   }
+
+  async findFutureByShopId(shopId: string) {
+    const now = new Date();
+    return await prisma.appointment.findMany({
+      where: {
+        shopId,
+        endDate: { gt: now },
+      },
+      include: {
+        services: true,
+      },
+      orderBy: {
+        startDate: "asc",
+      },
+    });
+  }
 }

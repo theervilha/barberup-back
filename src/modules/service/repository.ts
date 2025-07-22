@@ -19,4 +19,12 @@ export class ServiceRepository {
   async delete(id: number): Promise<Service> {
     return await prisma.service.delete({ where: { id } });
   }
+
+  async findManyByIds(ids: number[]) {
+    return await prisma.service.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+  }
 }

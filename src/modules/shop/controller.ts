@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
-import { ShopService } from "./service";
-import { ShopRepository } from "./repository";
 import { ShopInputSchema, UpdateShopSchema } from "./validators/shop.schema";
-
-const shopRepository = new ShopRepository();
-const shopService = new ShopService(shopRepository);
+import { shopService } from "../../di/container";
 
 export async function findShopById(req: Request, res: Response) {
   const id = req.params.id;

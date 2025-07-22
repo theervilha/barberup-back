@@ -2,10 +2,28 @@ import { jest, describe, expect, beforeEach, it } from "@jest/globals";
 import { AppointmentRepository } from "./repository";
 import { AppointmentService } from "./service";
 import { CreateAppointmentInput } from "./validators/appointment.schema";
+import { ServiceRepository } from "../service/repository";
+import { ShopService } from "../shop/service";
 
 describe("Appointment Service", () => {
   let appointmentService: AppointmentService;
   let mockRepository: jest.Mocked<AppointmentRepository>;
+  let serviceRepository: jest.Mocked<ServiceRepository>;
+  let shopService: jest.Mocked<ShopService>;
+
+  const services = [
+    {
+      id: 1,
+      name: "Corte de Cabelo",
+      description: "Corte padrão masculino",
+      images: [],
+      consumeMinutes: 30,
+      price: 3000,
+      shopId: "shop-123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ];
 
   const baseMockAppointment = {
     id: 1,
@@ -16,19 +34,7 @@ describe("Appointment Service", () => {
     customerPhone: "5584911111111",
     createdAt: new Date(),
     updatedAt: new Date(),
-    services: [
-      {
-        id: 1,
-        name: "Corte de Cabelo",
-        description: "Corte padrão masculino",
-        images: [],
-        consumeMinutes: 30,
-        price: 3000,
-        shopId: "shop-123",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
+    services,
   };
 
   beforeEach(() => {
@@ -37,9 +43,28 @@ describe("Appointment Service", () => {
       getById: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findFutureByShopId: jest.fn(),
     } as jest.Mocked<AppointmentRepository>;
+    serviceRepository = {
+      create: jest.fn(),
+      findById: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      findManyByIds: jest.fn(),
+    } as jest.Mocked<ServiceRepository>;
+    shopService = Object.create(ShopService.prototype);
+    shopService.findById = jest.fn();
+    shopService.findAll = jest.fn();
+    shopService.create = jest.fn();
+    shopService.update = jest.fn();
+    shopService.delete = jest.fn();
+    shopService.isShopAvailableBetweenDates = jest.fn();
 
-    appointmentService = new AppointmentService(mockRepository);
+    appointmentService = new AppointmentService(
+      mockRepository,
+      serviceRepository,
+      shopService,
+    );
   });
 
   describe("create", () => {
@@ -47,13 +72,14 @@ describe("Appointment Service", () => {
       mockRepository.create.mockResolvedValue(baseMockAppointment);
       const createInput: CreateAppointmentInput = {
         shopId: "shop-123",
-        startDate: "2023-10-27T10:00:00.000Z",
-        endDate: "2023-10-27T10:00:00.000Z",
+        startDate: "2026-10-27T10:00:00.000Z",
+        endDate: "2026-10-27T10:30:00.000Z",
         customerName: "Teste",
         customerPhone: "5584911111111",
         serviceIds: [1],
       };
 
+      serviceRepository.findManyByIds.mockResolvedValue(services);
       const result = await appointmentService.create(createInput);
 
       const { shopId, serviceIds, ...restOfCreateInput } = createInput;

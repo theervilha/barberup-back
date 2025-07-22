@@ -25,6 +25,7 @@ describe("Services Service", () => {
       findById: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findManyByIds: jest.fn(),
     } as jest.Mocked<ServiceRepository>;
 
     servicesService = new ServicesService(mockRepository);
