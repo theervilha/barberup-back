@@ -39,3 +39,6 @@ coverage/
 *.pem          # certificados SSL privados (se houver)
 
 src/generated/prisma
+
+# Sentry Config File
+.sentryclirc
