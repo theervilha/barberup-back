@@ -14,34 +14,35 @@ datasource db {
 }
 
 model Shop {
-  id String @id @default(cuid())
-  name String
+  id      String @id @default(cuid())
+  name    String
   address String
-  phone String
+  phone   String
 
-  services Service[]
+  services     Service[]
   appointments Appointment[]
   workingHours WorkingHour[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userShops UserShop[]
 
   @@map("shops")
 }
 
 model Service {
-  id      Int      @id @default(autoincrement())
-  name String
-  description String
-  images String[] @default([])
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String
+  images         String[] @default([])
   consumeMinutes Int
-  price Int
+  price          Int
 
   appointments Appointment[]
 
-  shop Shop @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id])
   shopId String
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,43 +50,53 @@ model Service {
 }
 
 model Appointment {
-  id      Int      @id @default(autoincrement())
-  startDate DateTime
-  endDate DateTime
-  customerName String
+  id            Int      @id @default(autoincrement())
+  startDate     DateTime
+  endDate       DateTime
+  customerName  String
   customerPhone String
 
   services Service[]
 
-  shop Shop @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id])
   shopId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("appointments")
 }
 
 model WorkingHour {
-  id String @id @default(cuid())
-  shop Shop @relation(fields: [shopId], references: [id])
+  id     String @id @default(cuid())
+  shop   Shop   @relation(fields: [shopId], references: [id])
   shopId String
 
   weekDay Int
-  openAt DateTime
+  openAt  DateTime
   closeAt DateTime
-  
+
   @@map("working_hours")
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
   password String
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userShops UserShop[]
+
   @@map("users")
+}
+
+model UserShop {
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
+  @@id([userId, shopId])
 }
