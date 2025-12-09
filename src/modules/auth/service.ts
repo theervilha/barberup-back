@@ -1,4 +1,5 @@
 import { UserAlreadyExistsError } from "../../infra/errors/UserAlreadyExistsError";
+import { UserNotFoundError } from "../../infra/errors/UserNotFoundError";
 import { authRepository } from "./repository";
 import { AuthInput } from "./validators/auth.schema";
 import bcrypt from "bcrypt";
@@ -27,5 +28,26 @@ export const authService = {
     });
 
     return { user: userWithoutPassword, token };
+  },
+
+  async login(data: AuthInput) {
+    const existingUser = await authRepository.findByEmail(data.email);
+    if (!existingUser) {
+      throw new UserNotFoundError();
+    }
+
+    const matchPassword = await bcrypt.compare(
+      data.password,
+      existingUser.password,
+    );
+    if (matchPassword) {
+      const { password, ...userWithoutPassword } = existingUser;
+      const token = jwt.sign(userWithoutPassword, JWT_SECRET, {
+        expiresIn: JWT_EXPIRES_IN,
+      });
+      return { user: userWithoutPassword, token };
+    }
+
+    throw new UserNotFoundError();
   },
 };

@@ -11,8 +11,7 @@ export async function register(
   res: Response,
   next: NextFunction,
 ) {
-  console.log(req);
-  const data = req.body; //.validatedBody as AuthInput;
+  const data = req.validatedBody as AuthInput;
 
   try {
     const user = await authService.register(data);
@@ -22,4 +21,11 @@ export async function register(
     // delega para o middleware global
     next(err);
   }
+}
+
+export async function login(req: Request, res: Response) {
+  const data = req.validatedBody as AuthInput;
+
+  const user = await authService.login(data);
+  res.status(200).json(user);
 }
