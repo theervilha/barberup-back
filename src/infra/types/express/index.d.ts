@@ -1,5 +1,5 @@
 //import { type UserPublic } from "../types/user.types";
-export {}
+export {};
 
 declare global {
   namespace Express {
