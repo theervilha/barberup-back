@@ -1,10 +1,10 @@
-//import { type UserPublic } from "../types/user.types";
+import { type UserPublic } from "../PublicUser";
 export {};
 
 declare global {
   namespace Express {
     interface Request {
-      //user?: UserPublic;
+      user?: UserPublic;
       validatedBody?: any;
       validatedQuery?: any;
     }

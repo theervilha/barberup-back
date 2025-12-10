@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { UserAlreadyExistsError } from "../../infra/errors/UserAlreadyExistsError";
 import { UserNotFoundError } from "../../infra/errors/UserNotFoundError";
 import { authRepository } from "./repository";
@@ -49,5 +50,27 @@ export const authService = {
     }
 
     throw new UserNotFoundError();
+  },
+
+  getUserFromToken(token: string): Promise<User | null> {
+    return new Promise((resolve) => {
+      jwt.verify(token, JWT_SECRET, async (err, payload: any) => {
+        if (err || !payload) {
+          return resolve(null);
+        }
+
+        try {
+          const user = await authRepository.findById(payload.id);
+
+          if (!user) {
+            return resolve(null);
+          }
+
+          resolve(user);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
   },
 };
